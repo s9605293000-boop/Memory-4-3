@@ -1,67 +1,56 @@
-const cards = [
-  "anchor.svg", "anchor.svg",
-  "ship.svg", "ship.svg",
-  "skull.svg", "skull.svg",
-  "sword.svg", "sword.svg",
-  "map.svg", "map.svg",
-  "compass.svg", "compass.svg"
+const gameBoard = document.getElementById("game-board");
+const levelSelect = document.getElementById("level");
+
+const cardsSet = [
+  "anchor.svg", "barrel.svg", "bomb.svg", "coin.svg",
+  "compass.svg", "map.svg", "parrot.svg", "ship.svg",
+  "skull.svg", "spyglass.svg", "sword.svg", "wheel.svg"
 ];
+
+function startGame() {
+  gameBoard.innerHTML = ""; // очищаем поле
+  let numCards = parseInt(levelSelect.value); // выбранное количество
+  let selectedCards = cardsSet.slice(0, numCards / 2); // нужное кол-во пар
+  let cards = [...selectedCards, ...selectedCards]; // удвоение пар
+
+  // перемешиваем карты
+  cards.sort(() => 0.5 - Math.random());
+
+  // создаём карточки
+  cards.forEach(card => {
+    const cardElement = document.createElement("div");
+    cardElement.classList.add("card");
+    cardElement.dataset.image = card;
+    cardElement.innerHTML = `<img src="back.svg" alt="back">`;
+
+    cardElement.addEventListener("click", flipCard);
+    gameBoard.appendChild(cardElement);
+  });
+}
 
 let firstCard = null;
 let lockBoard = false;
 
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
+function flipCard() {
+  if (lockBoard) return;
+  if (this === firstCard) return;
 
-function createBoard() {
-  const board = document.getElementById("game-board");
-  board.innerHTML = "";
-  const shuffled = shuffle(cards);
-
-  shuffled.forEach(cardName => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-
-    const img = document.createElement("img");
-    img.src = cardName;
-    img.alt = cardName;
-
-    card.appendChild(img);
-
-    card.addEventListener("click", () => flipCard(card));
-    board.appendChild(card);
-  });
-}
-
-function flipCard(card) {
-  if (lockBoard || card.classList.contains("flipped")) return;
-
-  card.classList.add("flipped");
+  this.innerHTML = `<img src="${this.dataset.image}" alt="card">`;
 
   if (!firstCard) {
-    firstCard = card;
-  } else {
-    const secondCard = card;
-    checkMatch(firstCard, secondCard);
-    firstCard = null;
+    firstCard = this;
+    return;
   }
-}
 
-function checkMatch(card1, card2) {
-  const img1 = card1.querySelector("img").src;
-  const img2 = card2.querySelector("img").src;
-
-  if (img1 === img2) {
-    // оставляем открытыми
+  if (firstCard.dataset.image === this.dataset.image) {
+    firstCard = null; // совпало
   } else {
     lockBoard = true;
     setTimeout(() => {
-      card1.classList.remove("flipped");
-      card2.classList.remove("flipped");
+      this.innerHTML = `<img src="back.svg" alt="back">`;
+      firstCard.innerHTML = `<img src="back.svg" alt="back">`;
+      firstCard = null;
       lockBoard = false;
     }, 1000);
   }
 }
-
-createBoard();
