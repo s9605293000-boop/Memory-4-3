@@ -1,84 +1,67 @@
-const cardsArray = [
-  'anchor.svg',
-  'barrel.svg',
-  'bomb.svg',
-  'coin.svg',
-  'compass.svg',
-  'map.svg',
-  'parrot.svg',
-  'ship.svg',
-  'skull.svg',
-  'spyglass.svg',
-  'sword.svg',
-  'wheel.svg'
+const cards = [
+  "anchor.svg", "anchor.svg",
+  "ship.svg", "ship.svg",
+  "skull.svg", "skull.svg",
+  "sword.svg", "sword.svg",
+  "map.svg", "map.svg",
+  "compass.svg", "compass.svg"
 ];
 
-let gameGrid = cardsArray.concat(cardsArray); // удвоение карт
-gameGrid.sort(() => 0.5 - Math.random());
-
-const gameBoard = document.getElementById('game-board');
 let firstCard = null;
-let secondCard = null;
 let lockBoard = false;
 
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
 function createBoard() {
-  gameBoard.innerHTML = '';
-  gameGrid.forEach(card => {
-    const cardElement = document.createElement('div');
-    cardElement.classList.add('card');
-    cardElement.dataset.card = card;
+  const board = document.getElementById("game-board");
+  board.innerHTML = "";
+  const shuffled = shuffle(cards);
 
-    cardElement.innerHTML = `
-      <img src="back.svg" class="back">
-      <img src="${card}" class="front">
-    `;
+  shuffled.forEach(cardName => {
+    const card = document.createElement("div");
+    card.classList.add("card");
 
-    cardElement.addEventListener('click', flipCard);
-    gameBoard.appendChild(cardElement);
+    const img = document.createElement("img");
+    img.src = cardName;
+    img.alt = cardName;
+
+    card.appendChild(img);
+
+    card.addEventListener("click", () => flipCard(card));
+    board.appendChild(card);
   });
 }
 
-function flipCard() {
-  if (lockBoard) return;
-  if (this === firstCard) return;
+function flipCard(card) {
+  if (lockBoard || card.classList.contains("flipped")) return;
 
-  this.classList.add('flipped');
+  card.classList.add("flipped");
 
   if (!firstCard) {
-    firstCard = this;
-    return;
+    firstCard = card;
+  } else {
+    const secondCard = card;
+    checkMatch(firstCard, secondCard);
+    firstCard = null;
   }
-
-  secondCard = this;
-  checkForMatch();
 }
 
-function checkForMatch() {
-  const isMatch = firstCard.dataset.card === secondCard.dataset.card;
+function checkMatch(card1, card2) {
+  const img1 = card1.querySelector("img").src;
+  const img2 = card2.querySelector("img").src;
 
-  isMatch ? disableCards() : unflipCards();
-}
-
-function disableCards() {
-  firstCard.removeEventListener('click', flipCard);
-  secondCard.removeEventListener('click', flipCard);
-
-  resetBoard();
-}
-
-function unflipCards() {
-  lockBoard = true;
-
-  setTimeout(() => {
-    firstCard.classList.remove('flipped');
-    secondCard.classList.remove('flipped');
-
-    resetBoard();
-  }, 1000);
-}
-
-function resetBoard() {
-  [firstCard, secondCard, lockBoard] = [null, null, false];
+  if (img1 === img2) {
+    // оставляем открытыми
+  } else {
+    lockBoard = true;
+    setTimeout(() => {
+      card1.classList.remove("flipped");
+      card2.classList.remove("flipped");
+      lockBoard = false;
+    }, 1000);
+  }
 }
 
 createBoard();
