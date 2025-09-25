@@ -8,6 +8,17 @@
 </head>
 <body>
   <h1>Memory Duel 4-3</h1>
+
+  <div>
+    <label>Выбери уровень: </label>
+    <select id="level">
+      <option value="12">Лёгкий (12 карт)</option>
+      <option value="16">Средний (16 карт)</option>
+      <option value="24">Сложный (24 карты)</option>
+    </select>
+    <button onclick="startGame()">Начать игру</button>
+  </div>
+
   <div id="game-board"></div>
 
   <script src="script.js"></script>
