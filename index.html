@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +9,12 @@
 <body>
   <h1>Memory Duel 4-3</h1>
 
-  <!-- Меню выбора уровня -->
   <div id="menu">
-    <button onclick="startGame(12)">Уровень A (12 карт)</button>
-    <button onclick="startGame(16)">Уровень B (16 карт)</button>
-    <button onclick="startGame(24)">Уровень C (24 карты)</button>
+    <button data-count="12">Уровень A (12 карт)</button>
+    <button data-count="16">Уровень B (16 карт)</button>
+    <button data-count="24">Уровень C (24 карты)</button>
   </div>
 
-  <!-- Игровое поле -->
   <div id="game-board"></div>
 
   <script src="script.js"></script>
