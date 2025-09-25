@@ -1,8 +1,14 @@
 body {
   font-family: Arial, sans-serif;
-  text-align: center;
-  background: #0d1b2a;
+  background: #0b1d2a;
   color: white;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
 }
 
 #game-board {
@@ -10,17 +16,26 @@ body {
   grid-template-columns: repeat(4, 100px);
   grid-gap: 10px;
   justify-content: center;
-  margin-top: 20px;
 }
 
 .card {
   width: 100px;
   height: 100px;
-  background: #1b263b;
-  border: 2px solid #778da9;
+  background: #1c2f3a;
+  border: 2px solid #3f6e8e;
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  font-size: 2rem;
+}
+
+.card img {
+  width: 80%;
+  height: 80%;
+  display: none;
+}
+
+.card.flipped img {
+  display: block;
 }
