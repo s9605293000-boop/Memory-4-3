@@ -1,36 +1,48 @@
-const cards = [
-  "pirate1.png", "pirate1.png",
-  "pirate2.png", "pirate2.png",
-  "pirate3.png", "pirate3.png",
-  "pirate4.png", "pirate4.png"
+const cardsArray = [
+  'anchor.svg',
+  'barrel.svg',
+  'bomb.svg',
+  'coin.svg',
+  'compass.svg',
+  'map.svg',
+  'parrot.svg',
+  'ship.svg',
+  'skull.svg',
+  'spyglass.svg',
+  'sword.svg',
+  'wheel.svg'
 ];
 
-let firstCard, secondCard;
+let gameGrid = cardsArray.concat(cardsArray); // удвоение карт
+gameGrid.sort(() => 0.5 - Math.random());
+
+const gameBoard = document.getElementById('game-board');
+let firstCard = null;
+let secondCard = null;
 let lockBoard = false;
 
-const board = document.getElementById("game-board");
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
 function createBoard() {
-  shuffle(cards).forEach(img => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.dataset.img = img;
+  gameBoard.innerHTML = '';
+  gameGrid.forEach(card => {
+    const cardElement = document.createElement('div');
+    cardElement.classList.add('card');
+    cardElement.dataset.card = card;
 
-    card.innerHTML = `<img src="assets/back.png" width="80">`;
+    cardElement.innerHTML = `
+      <img src="back.svg" class="back">
+      <img src="${card}" class="front">
+    `;
 
-    card.addEventListener("click", flipCard);
-    board.appendChild(card);
+    cardElement.addEventListener('click', flipCard);
+    gameBoard.appendChild(cardElement);
   });
 }
 
 function flipCard() {
-  if (lockBoard || this === firstCard) return;
+  if (lockBoard) return;
+  if (this === firstCard) return;
 
-  this.innerHTML = `<img src="assets/${this.dataset.img}" width="80">`;
+  this.classList.add('flipped');
 
   if (!firstCard) {
     firstCard = this;
@@ -38,26 +50,29 @@ function flipCard() {
   }
 
   secondCard = this;
-  checkMatch();
+  checkForMatch();
 }
 
-function checkMatch() {
-  let isMatch = firstCard.dataset.img === secondCard.dataset.img;
+function checkForMatch() {
+  const isMatch = firstCard.dataset.card === secondCard.dataset.card;
 
   isMatch ? disableCards() : unflipCards();
 }
 
 function disableCards() {
-  firstCard.removeEventListener("click", flipCard);
-  secondCard.removeEventListener("click", flipCard);
+  firstCard.removeEventListener('click', flipCard);
+  secondCard.removeEventListener('click', flipCard);
+
   resetBoard();
 }
 
 function unflipCards() {
   lockBoard = true;
+
   setTimeout(() => {
-    firstCard.innerHTML = `<img src="assets/back.png" width="80">`;
-    secondCard.innerHTML = `<img src="assets/back.png" width="80">`;
+    firstCard.classList.remove('flipped');
+    secondCard.classList.remove('flipped');
+
     resetBoard();
   }, 1000);
 }
