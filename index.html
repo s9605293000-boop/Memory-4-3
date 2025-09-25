@@ -1,69 +1,22 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Memory Duel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Duel 4-3</title>
+  <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
-  <meta name="theme-color" content="#0e1a2b">
 </head>
 <body>
-  <header>
-    <h1>Memory Duel</h1>
-    <div id="userBox" class="hidden">
-      <span id="userName"></span>
-      <button id="signOut" class="btn">Выйти</button>
-    </div>
-  </header>
-  <main>
-    <!-- AUTH -->
-    <section id="auth">
-      <h2>Вход</h2>
-      <div class="info">
-        <input id="email" type="email" placeholder="email">
-        <input id="pass" type="password" placeholder="пароль">
-        <button id="doSignIn" class="btn">Войти / Регистрация</button>
-        <button id="anon" class="btn">Гость</button>
-      </div>
-      <p id="authErr"></p>
-    </section>
+  <h1>Memory Duel 4-3</h1>
+  <div id="game-board"></div>
 
-    <!-- LOBBY -->
-    <section id="lobby" class="hidden">
-      <div class="info">
-        <label>Уровень:
-          <select id="level">
-            <option value="4x3">4×3</option>
-            <option value="4x4" selected>4×4</option>
-            <option value="4x6">4×6</option>
-          </select>
-        </label>
-        <button id="quickPlay" class="btn">Быстрый матч</button>
-      </div>
-      <h3>Онлайн</h3>
-      <div id="online"></div>
-    </section>
-
-    <!-- GAME -->
-    <section id="game" class="hidden">
-      <div class="info">
-        <div class="score">
-          <span class="badge" id="p1Badge">P1: <b id="p1Name">—</b> · <b id="p1Score">0</b></span>
-          <span class="badge" id="p2Badge">P2: <b id="p2Name">—</b> · <b id="p2Score">0</b></span>
-          <span class="badge">Ход: <b id="turnBadge">—</b></span>
-          <span class="badge">Таймер: <b id="timer">—</b></span>
-        </div>
-        <button id="leave" class="btn">Покинуть матч</button>
-      </div>
-      <div id="board" class="grid"></div>
-    </section>
-  </main>
-  <footer>
-    <small>v4.3 PWA · Firebase Realtime Database</small>
-    <button id="install" class="btn">Установить</button>
-  </footer>
-
-  <script type="module" src="src/main.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Регистрация сервис-воркера
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 </body>
 </html>
