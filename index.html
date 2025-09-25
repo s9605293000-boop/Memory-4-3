@@ -9,16 +9,14 @@
 <body>
   <h1>Memory Duel 4-3</h1>
 
-  <div>
-    <label>Выбери уровень: </label>
-    <select id="level">
-      <option value="12">Лёгкий (12 карт)</option>
-      <option value="16">Средний (16 карт)</option>
-      <option value="24">Сложный (24 карты)</option>
-    </select>
-    <button onclick="startGame()">Начать игру</button>
+  <!-- Меню выбора уровня -->
+  <div id="menu">
+    <button onclick="startGame(12)">Уровень A (12 карт)</button>
+    <button onclick="startGame(16)">Уровень B (16 карт)</button>
+    <button onclick="startGame(24)">Уровень C (24 карты)</button>
   </div>
 
+  <!-- Игровое поле -->
   <div id="game-board"></div>
 
   <script src="script.js"></script>
