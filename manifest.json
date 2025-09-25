@@ -1,0 +1,20 @@
+{
+  "name": "Memory Duel",
+  "short_name": "Memory",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e1a2b",
+  "theme_color": "#0e1a2b",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

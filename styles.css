@@ -1,0 +1,68 @@
+
+:root{
+  --navy:#0e1a2b;
+  --ink:#101826;
+  --mint:#34d399;
+  --accent:#c9d0ff;
+  --cardW:84px;
+  --gap:8px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:var(--navy);
+  color:white;
+  display:flex;
+  flex-direction:column;
+}
+header,footer{padding:10px 12px; background:#0a1422; display:flex; align-items:center; justify-content:space-between}
+header h1{font-size:16px; margin:0}
+main{flex:1; display:flex; flex-direction:column; padding:10px}
+.hidden{display:none !important}
+
+#auth, #lobby, #game{max-width:900px; margin:0 auto; width:100%}
+
+.btn{background:#2d3b66; border:1px solid #5563a3; color:#fff; padding:10px 14px; border-radius:10px; cursor:pointer}
+.btn[disabled]{opacity:0.6; cursor:not-allowed}
+
+input,select{padding:10px 12px; border-radius:10px; border:1px solid #5563a3; background:#0d1830; color:#fff}
+
+.grid{
+  margin-top:8px;
+  display:grid;
+  gap:var(--gap);
+  justify-content:center;
+  align-content:center;
+  flex:1;
+}
+.card{
+  width:var(--cardW);
+  aspect-ratio:3/4;
+  perspective:800px;
+}
+.card>div{
+  position:relative;
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  transition:transform .3s;
+  border-radius:14px;
+}
+.card.flipped>div{ transform:rotateY(180deg) }
+.face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:14px; overflow:hidden; background:#0d1830; border:3px solid var(--accent);
+}
+.face img{ width:100%; height:100%; object-fit:cover }
+.face.back{ transform:rotateY(180deg) }
+.info{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.score{display:flex; gap:12px; flex-wrap:wrap}
+.badge{background:#14244a; border:1px solid #465496; padding:4px 10px; border-radius:999px}
+
+@media (min-height:700px){
+  :root{ --cardW:96px; --gap:10px; }
+}
+@media (min-height:820px){
+  :root{ --cardW:104px; --gap:12px; }
+}
