@@ -3,19 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Duel 4-3</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Memory Duel — Вход</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Memory Duel 4-3</h1>
+  <div class="login-container">
+    <h1>Memory Duel</h1>
 
-  <div id="menu">
-    <button data-count="12">Уровень A (12 карт)</button>
-    <button data-count="16">Уровень B (16 карт)</button>
-    <button data-count="24">Уровень C (24 карты)</button>
+    <!-- Форма входа -->
+    <div id="login-form">
+      <h2>Вход</h2>
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-password" placeholder="Пароль" required>
+      <button onclick="login()">Войти</button>
+      <p>Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
+    </div>
+
+    <!-- Форма регистрации -->
+    <div id="register-form" style="display:none;">
+      <h2>Регистрация</h2>
+      <input type="text" id="register-name" placeholder="Имя" required>
+      <input type="email" id="register-email" placeholder="Email" required>
+      <input type="password" id="register-password" placeholder="Пароль" required>
+      <button onclick="register()">Зарегистрироваться</button>
+      <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+    </div>
   </div>
-
-  <div id="game-board"></div>
 
   <script src="script.js"></script>
 </body>
