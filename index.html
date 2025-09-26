@@ -4,43 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory Duel</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Memory Duel</h1>
-
   <!-- Страница входа -->
-  <div id="login-page">
-    <h2>Вход</h2>
-    <input type="text" id="login-email" placeholder="Email">
-    <input type="password" id="login-password" placeholder="Пароль">
-    <button onclick="login()">Войти</button>
-    <p>Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
+  <div id="login-page" class="page active">
+    <h1>Memory Duel</h1>
+    <input type="text" id="username" placeholder="Введите имя">
+    <button id="loginBtn">Войти</button>
+    <button id="registerBtn">Регистрация</button>
   </div>
 
-  <!-- Страница регистрации -->
-  <div id="register-page" style="display:none;">
-    <h2>Регистрация</h2>
-    <input type="text" id="register-email" placeholder="Email">
-    <input type="password" id="register-password" placeholder="Пароль">
-    <button onclick="register()">Зарегистрироваться</button>
-    <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+  <!-- Личная страница -->
+  <div id="profile-page" class="page">
+    <h2>Привет, <span id="playerName"></span>!</h2>
+    <p>Твой рейтинг: <span id="playerRating">0</span></p>
+    <button id="playBtn">Играть</button>
+    <button id="logoutBtn">Выйти</button>
   </div>
 
   <!-- Лобби -->
-  <div id="lobby-page" style="display:none;">
-    <h2>Лобби</h2>
-    <button onclick="createRoom()">Создать стол</button>
-    <div id="rooms-list"></div>
+  <div id="lobby-page" class="page">
+    <h2>Выбор стола</h2>
+    <button id="createGameBtn">Создать стол</button>
+    <h3>Доступные столы</h3>
+    <ul id="gamesList"></ul>
+    <button id="backToProfile">Назад</button>
   </div>
 
-  <!-- Игровая страница -->
-  <div id="game-page" style="display:none;">
-    <h2>Игра Memory Duel</h2>
+  <!-- Игровое поле -->
+  <div id="game-page" class="page">
+    <div id="game-header">
+      <div class="player-score" id="player1">
+        Игрок 1: <span id="score1">0</span>
+      </div>
+      <div class="player-score" id="player2">
+        Игрок 2: <span id="score2">0</span>
+      </div>
+    </div>
     <div id="game-board"></div>
-    <button onclick="exitGame()">Выйти в лобби</button>
+    <button id="exitGame">Выйти из игры</button>
   </div>
 
-  <script src="main.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
