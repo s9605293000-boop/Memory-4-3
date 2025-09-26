@@ -3,33 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Duel — Вход</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Memory Duel</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="login-container">
-    <h1>Memory Duel</h1>
+  <h1>Memory Duel</h1>
 
-    <!-- Форма входа -->
-    <div id="login-form">
-      <h2>Вход</h2>
-      <input type="email" id="login-email" placeholder="Email" required>
-      <input type="password" id="login-password" placeholder="Пароль" required>
-      <button onclick="login()">Войти</button>
-      <p>Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
-    </div>
-
-    <!-- Форма регистрации -->
-    <div id="register-form" style="display:none;">
-      <h2>Регистрация</h2>
-      <input type="text" id="register-name" placeholder="Имя" required>
-      <input type="email" id="register-email" placeholder="Email" required>
-      <input type="password" id="register-password" placeholder="Пароль" required>
-      <button onclick="register()">Зарегистрироваться</button>
-      <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
-    </div>
+  <!-- Страница входа -->
+  <div id="login-page">
+    <h2>Вход</h2>
+    <input type="text" id="login-email" placeholder="Email">
+    <input type="password" id="login-password" placeholder="Пароль">
+    <button onclick="login()">Войти</button>
+    <p>Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Страница регистрации -->
+  <div id="register-page" style="display:none;">
+    <h2>Регистрация</h2>
+    <input type="text" id="register-email" placeholder="Email">
+    <input type="password" id="register-password" placeholder="Пароль">
+    <button onclick="register()">Зарегистрироваться</button>
+    <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+  </div>
+
+  <!-- Лобби -->
+  <div id="lobby-page" style="display:none;">
+    <h2>Лобби</h2>
+    <button onclick="createRoom()">Создать стол</button>
+    <div id="rooms-list"></div>
+  </div>
+
+  <!-- Игровая страница -->
+  <div id="game-page" style="display:none;">
+    <h2>Игра Memory Duel</h2>
+    <div id="game-board"></div>
+    <button onclick="exitGame()">Выйти в лобби</button>
+  </div>
+
+  <script src="main.js"></script>
 </body>
 </html>
