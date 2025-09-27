@@ -30,6 +30,12 @@
   <!-- Лобби -->
   <div id="lobby-page" style="display:none;">
     <h2>Лобби</h2>
+    <label for="level-select">Выбери уровень:</label>
+    <select id="level-select">
+      <option value="12">4 x 3 (12 карт)</option>
+      <option value="16">4 x 4 (16 карт)</option>
+      <option value="24">6 x 4 (24 карты)</option>
+    </select>
     <button onclick="createRoom()">Создать стол</button>
     <div id="rooms-list"></div>
   </div>
@@ -37,12 +43,10 @@
   <!-- Игровая страница -->
   <div id="game-page" style="display:none;">
     <h2>Игра Memory Duel</h2>
-    <!-- здесь будут появляться карточки -->
     <div id="game-board"></div>
     <button onclick="exitGame()">Выйти в лобби</button>
   </div>
 
-  <!-- Скрипт обязательно внизу -->
   <script src="main.js"></script>
 </body>
 </html>
