@@ -1,59 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Memory Duel</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Memory Duel</h1>
+  <h1 class="app-title">Memory Duel</h1>
 
-  <!-- Страница входа -->
-  <div id="login-page">
+  <!-- Вход -->
+  <div id="login-page" class="page">
     <h2>Вход</h2>
-    <input type="text" id="login-email" placeholder="Email">
-    <input type="password" id="login-password" placeholder="Пароль">
-    <button onclick="login()">Войти</button>
-    <p>Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
+    <input id="login-email" type="text" placeholder="Email" />
+    <input id="login-password" type="password" placeholder="Пароль" />
+    <button class="btn" onclick="login()">Войти</button>
+    <p class="muted">Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
   </div>
 
-  <!-- Страница регистрации -->
-  <div id="register-page" style="display:none;">
+  <!-- Регистрация -->
+  <div id="register-page" class="page" style="display:none">
     <h2>Регистрация</h2>
-    <input type="text" id="register-email" placeholder="Email">
-    <input type="password" id="register-password" placeholder="Пароль">
-    <button onclick="register()">Зарегистрироваться</button>
-    <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+    <input id="register-email" type="text" placeholder="Email" />
+    <input id="register-password" type="password" placeholder="Пароль" />
+    <button class="btn" onclick="register()">Зарегистрироваться</button>
+    <p class="muted">Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
   </div>
 
   <!-- Лобби -->
-  <div id="lobby-page" style="display:none;">
+  <div id="lobby-page" class="page" style="display:none">
     <h2>Лобби</h2>
-    <label>Выбери уровень:</label>
-    <select id="level-select">
-      <option value="12">Лёгкий (4x3)</option>
-      <option value="16">Средний (4x4)</option>
-      <option value="24">Сложный (6x4)</option>
-    </select>
-    <br><br>
-    <button onclick="createRoom()">Создать стол</button>
-    <button onclick="showRecords()">Таблица рекордов</button>
-    <div id="rooms-list"></div>
+    <div class="row">
+      <button class="btn" onclick="createRoom()">Создать стол</button>
+    </div>
+
+    <div class="levels">
+      <span>Уровень:</span>
+      <button class="chip" data-rows="3" data-cols="4" onclick="selectLevel(this)">A (4×3)</button>
+      <button class="chip" data-rows="4" data-cols="4" onclick="selectLevel(this)">B (4×4)</button>
+      <button class="chip" data-rows="4" data-cols="6" onclick="selectLevel(this)">C (4×6)</button>
+    </div>
+
+    <div id="rooms-list" class="list"></div>
   </div>
 
-  <!-- Игровая страница -->
-  <div id="game-page" style="display:none;">
+  <!-- Игра -->
+  <div id="game-page" class="page" style="display:none">
     <h2>Игра Memory Duel</h2>
-    <div id="game-board"></div>
-    <button onclick="exitGame()">Выйти в лобби</button>
-  </div>
 
-  <!-- Таблица рекордов -->
-  <div id="records-page" style="display:none;">
-    <h2>Таблица рекордов</h2>
-    <ul id="records-list"></ul>
-    <button onclick="backToLobby()">Назад в лобби</button>
+    <div class="levels small">
+      <span>Уровень:</span>
+      <button class="chip" data-rows="3" data-cols="4" onclick="rebuildFromChip(this)">A</button>
+      <button class="chip" data-rows="4" data-cols="4" onclick="rebuildFromChip(this)">B</button>
+      <button class="chip" data-rows="4" data-cols="6" onclick="rebuildFromChip(this)">C</button>
+    </div>
+
+    <div id="game-board" class="board"></div>
+
+    <div class="row">
+      <button class="btn secondary" onclick="exitGame()">Выйти в лобби</button>
+    </div>
   </div>
 
   <script src="main.js"></script>
