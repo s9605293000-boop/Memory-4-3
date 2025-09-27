@@ -1,28 +1,28 @@
-let users = [];
+// main.js
+
 let currentUser = null;
-let records = [];
+let rooms = [];
+let currentRoom = null;
 
-function showRegister() {
-  document.getElementById("login-page").style.display = "none";
-  document.getElementById("register-page").style.display = "block";
+function showPage(pageId) {
+  document.querySelectorAll("div[id$='-page']").forEach(div => {
+    div.style.display = "none";
+  });
+  document.getElementById(pageId).style.display = "block";
 }
 
-function showLogin() {
-  document.getElementById("register-page").style.display = "none";
-  document.getElementById("login-page").style.display = "block";
-}
-
+// ----- Логин / Регистрация -----
 function login() {
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
-  const user = users.find(u => u.email === email && u.password === password);
 
-  if (user) {
-    currentUser = user;
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("lobby-page").style.display = "block";
+  if (email && password) {
+    currentUser = { email, rating: 0 };
+    alert("Успешный вход!");
+    showPage("lobby-page");
+    renderLobby();
   } else {
-    alert("Неверные данные или пользователь не зарегистрирован.");
+    alert("Введите email и пароль");
   }
 }
 
@@ -30,75 +30,112 @@ function register() {
   const email = document.getElementById("register-email").value;
   const password = document.getElementById("register-password").value;
 
-  if (!users.find(u => u.email === email)) {
-    users.push({ email, password });
-    alert("Регистрация успешна! Теперь войдите.");
+  if (email && password) {
+    alert("Регистрация успешна!");
     showLogin();
   } else {
-    alert("Пользователь с таким email уже существует.");
+    alert("Введите email и пароль");
   }
+}
+
+function showRegister() {
+  showPage("register-page");
+}
+
+function showLogin() {
+  showPage("login-page");
+}
+
+// ----- Лобби -----
+function renderLobby() {
+  const list = document.getElementById("rooms-list");
+  list.innerHTML = "";
+
+  rooms.forEach((room, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = `Стол #${index + 1}`;
+    btn.onclick = () => joinRoom(index);
+    list.appendChild(btn);
+  });
 }
 
 function createRoom() {
-  const level = document.getElementById("level-select").value;
-  startGame(level);
+  rooms.push({ players: [currentUser], cards: [] });
+  renderLobby();
 }
 
-function startGame(level) {
-  document.getElementById("lobby-page").style.display = "none";
-  document.getElementById("game-page").style.display = "block";
-
-  const gameBoard = document.getElementById("game-board");
-  gameBoard.innerHTML = "";
-
-  let rows, cols;
-  if (level == 12) { rows = 3; cols = 4; }
-  if (level == 16) { rows = 4; cols = 4; }
-  if (level == 24) { rows = 4; cols = 6; }
-
-  const totalCards = rows * cols;
-  const images = [];
-  for (let i = 1; i <= totalCards / 2; i++) {
-    images.push(`https://placekitten.com/200/200?image=${i}`);
-    images.push(`https://placekitten.com/200/200?image=${i}`);
+function joinRoom(index) {
+  if (rooms[index].players.length < 2) {
+    rooms[index].players.push(currentUser);
+    currentRoom = rooms[index];
+    alert("Вы присоединились к столу!");
+    startGame();
+  } else {
+    alert("Стол уже полон!");
   }
+}
+
+// ----- Игра -----
+function startGame() {
+  showPage("game-page");
+  const board = document.getElementById("game-board");
+  board.innerHTML = "";
+
+  // Определяем размер сетки (пока по умолчанию 4x3)
+  const rows = 3;
+  const cols = 4;
+  const totalCards = rows * cols;
+
+  // Список картинок-заглушек
+  let images = [];
+  for (let i = 0; i < totalCards / 2; i++) {
+    images.push(`https://picsum.photos/200/200?random=${i}`);
+  }
+  images = [...images, ...images]; // дублируем пары
   images.sort(() => Math.random() - 0.5);
 
-  gameBoard.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
-  images.forEach(img => {
+  // Создаём карточки
+  images.forEach((src, idx) => {
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `
-      <div class="card-inner">
-        <div class="card-front">?</div>
-        <div class="card-back"><img src="${img}" alt="card"></div>
-      </div>
-    `;
-    gameBoard.appendChild(card);
+    card.dataset.index = idx;
+
+    const img = document.createElement("img");
+    img.src = src;
+    img.className = "hidden";
+
+    card.appendChild(img);
+    card.onclick = () => flipCard(card);
+    board.appendChild(card);
   });
+}
+
+let flippedCards = [];
+function flipCard(card) {
+  const img = card.querySelector("img");
+  if (img.classList.contains("hidden")) {
+    img.classList.remove("hidden");
+    flippedCards.push(card);
+  }
+
+  if (flippedCards.length === 2) {
+    const [c1, c2] = flippedCards;
+    const i1 = c1.querySelector("img").src;
+    const i2 = c2.querySelector("img").src;
+
+    if (i1 === i2) {
+      flippedCards = [];
+    } else {
+      setTimeout(() => {
+        c1.querySelector("img").classList.add("hidden");
+        c2.querySelector("img").classList.add("hidden");
+        flippedCards = [];
+      }, 1000);
+    }
+  }
 }
 
 function exitGame() {
-  document.getElementById("game-page").style.display = "none";
-  document.getElementById("lobby-page").style.display = "block";
-}
-
-function showRecords() {
-  document.getElementById("game-page").style.display = "none";
-  document.getElementById("lobby-page").style.display = "none";
-  document.getElementById("records-page").style.display = "block";
-
-  const list = document.getElementById("records-list");
-  list.innerHTML = "";
-  records.forEach(r => {
-    let li = document.createElement("li");
-    li.textContent = `${r.user} — Очки: ${r.score}, Время: ${r.time} сек (${r.date})`;
-    list.appendChild(li);
-  });
-}
-
-function backToLobby() {
-  document.getElementById("records-page").style.display = "none";
-  document.getElementById("lobby-page").style.display = "block";
+  showPage("lobby-page");
+  renderLobby();
 }
