@@ -1,145 +1,192 @@
-// Заглушки картинок (замени на свои)
-const images = [
-  "https://i.ibb.co/ygjV4Zt/pirate1.png",
-  "https://i.ibb.co/vJWh3G9/pirate2.png",
-  "https://i.ibb.co/hBBnHvL/pirate3.png",
-  "https://i.ibb.co/yS4srjX/pirate4.png",
-  "https://i.ibb.co/ZmS7pD7/pirate5.png",
-  "https://i.ibb.co/bz07sSb/pirate6.png",
-  "https://i.ibb.co/R2MJFRq/pirate7.png",
-  "https://i.ibb.co/88YVf42/pirate8.png",
-  "https://i.ibb.co/D9sQNjc/pirate9.png",
-  "https://i.ibb.co/7X8DGrV/pirate10.png",
-  "https://i.ibb.co/3dgbjV6/pirate11.png",
-  "https://i.ibb.co/gTbFjSz/pirate12.png"
-];
-
+// --- Простая «сессия» ---
 let currentUser = null;
-let firstCard = null;
-let secondCard = null;
-let lockBoard = false;
-let score = 0;
+let rooms = [];
+let currentRoom = null;
 
-function showRegister() {
-  document.getElementById("login-page").style.display = "none";
-  document.getElementById("register-page").style.display = "block";
+// выбранная сетка (по умолчанию 4×3)
+let grid = { rows: 3, cols: 4 };
+
+// набор картинок (лежат у тебя в репозитории)
+const SPRITES = [
+  "anchor.svg","barrel.svg","bomb.svg","coin.svg",
+  "compass.svg","map.svg","parrot.svg","ship.svg",
+  "skull.svg","spyglass.svg","sword.svg","wheel.svg"
+];
+const BACK = "back.svg";
+
+// ---------- Навигация страниц ----------
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+  document.getElementById(id).style.display = "block";
 }
 
-function showLogin() {
-  document.getElementById("register-page").style.display = "none";
-  document.getElementById("login-page").style.display = "block";
+// ---------- Аутентификация (демо) ----------
+function login(){
+  const email = document.getElementById("login-email").value.trim();
+  const pwd   = document.getElementById("login-password").value.trim();
+  if(!email || !pwd){ alert("Введите email и пароль"); return; }
+  currentUser = { email, rating: 0 };
+  showPage("lobby-page");
+  renderLobby();
+}
+function register(){
+  const email = document.getElementById("register-email").value.trim();
+  const pwd   = document.getElementById("register-password").value.trim();
+  if(!email || !pwd){ alert("Введите email и пароль"); return; }
+  alert("Регистрация успешна!");
+  showLogin();
+}
+function showRegister(){ showPage("register-page"); }
+function showLogin(){ showPage("login-page"); }
+
+// ---------- Выбор уровня ----------
+function setActiveChip(container, rows, cols){
+  container.querySelectorAll(".chip").forEach(c=>{
+    const r = +c.dataset.rows, cl = +c.dataset.cols;
+    c.classList.toggle("active", r===rows && cl===cols);
+  });
+}
+function selectLevel(btn){
+  grid = { rows:+btn.dataset.rows, cols:+btn.dataset.cols };
+  setActiveChip(btn.parentElement, grid.rows, grid.cols);
+}
+function rebuildFromChip(btn){
+  selectLevel(btn);
+  startGame(); // перестроить поле в игре
 }
 
-function login() {
-  currentUser = document.getElementById("login-email").value;
-  if (!currentUser) {
-    alert("Введите email!");
-    return;
-  }
-  document.getElementById("login-page").style.display = "none";
-  document.getElementById("lobby-page").style.display = "block";
+// ---------- Лобби ----------
+function renderLobby(){
+  // выставим активный чип (визуально)
+  const lobbyLevels = document.querySelector("#lobby-page .levels");
+  setActiveChip(lobbyLevels, grid.rows, grid.cols);
+
+  const list = document.getElementById("rooms-list");
+  list.innerHTML = "";
+  rooms.forEach((room, i)=>{
+    const b = document.createElement("button");
+    b.textContent = `Стол #${i+1} (${room.rows}×${room.cols}) — игроков: ${room.players.length}/2`;
+    b.onclick = ()=>joinRoom(i);
+    list.appendChild(b);
+  });
+}
+function createRoom(){
+  const room = {
+    rows: grid.rows,
+    cols: grid.cols,
+    players: [currentUser],
+    deck: []
+  };
+  rooms.push(room);
+  renderLobby();
+}
+function joinRoom(i){
+  const room = rooms[i];
+  if(!room) return;
+  if(room.players.length >= 2){ alert("Стол уже полон"); return; }
+  room.players.push(currentUser);
+  currentRoom = room;
+  // сетку берём из стола
+  grid = { rows: room.rows, cols: room.cols };
+  startGame();
 }
 
-function register() {
-  currentUser = document.getElementById("register-email").value;
-  if (!currentUser) {
-    alert("Введите email!");
-    return;
-  }
-  document.getElementById("register-page").style.display = "none";
-  document.getElementById("lobby-page").style.display = "block";
-}
+// ---------- Игра ----------
+let lock = false;
+let opened = []; // открытые (2 макс)
 
-function createRoom() {
-  const level = parseInt(document.getElementById("level-select").value, 10);
-  startGame(level);
-}
+function startGame(){
+  showPage("game-page");
 
-function exitGame() {
-  document.getElementById("game-page").style.display = "none";
-  document.getElementById("lobby-page").style.display = "block";
-}
+  // активный чип в шапке игры
+  const gameLevels = document.querySelector("#game-page .levels");
+  setActiveChip(gameLevels, grid.rows, grid.cols);
 
-function startGame(totalCards) {
-  document.getElementById("lobby-page").style.display = "none";
-  document.getElementById("game-page").style.display = "block";
+  const board = document.getElementById("game-board");
+  board.style.setProperty("--cols", grid.cols);
+  board.innerHTML = "";
 
-  score = 0;
-  document.getElementById("score").innerText = "Очки: 0";
+  const pairCount = (grid.rows * grid.cols) / 2;
+  const sprites = SPRITES.slice(0, pairCount);
+  const deck = shuffle([...sprites, ...sprites]).map(src => ({
+    id: cryptoRandom(),
+    src,
+    matched: false
+  }));
 
-  let gameBoard = document.getElementById("game-board");
-  gameBoard.innerHTML = "";
+  // сохраним в текущем столе (если есть)
+  if(currentRoom){ currentRoom.deck = deck; }
 
-  let selectedImages = images.slice(0, totalCards / 2);
-  let cards = [...selectedImages, ...selectedImages];
-
-  cards = shuffle(cards);
-
-  cards.forEach(image => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-
-    card.innerHTML = `
-      <div class="card-inner">
-        <div class="card-front">?</div>
-        <div class="card-back"><img src="${image}" alt="pirate"></div>
-      </div>
-    `;
-
-    card.addEventListener("click", () => flipCard(card, image));
-    gameBoard.appendChild(card);
+  deck.forEach(cardData=>{
+    const el = document.createElement("div");
+    el.className = "card";
+    el.dataset.src = cardData.src;     // лицевая сторона
+    el.style.backgroundImage = `url('${BACK}')`; // рубашка
+    el.onclick = () => onCardClick(el);
+    board.appendChild(el);
   });
 
-  if (totalCards === 12) {
-    gameBoard.style.gridTemplateColumns = "repeat(4, 1fr)";
-  } else if (totalCards === 16) {
-    gameBoard.style.gridTemplateColumns = "repeat(4, 1fr)";
-  } else if (totalCards === 24) {
-    gameBoard.style.gridTemplateColumns = "repeat(6, 1fr)";
+  lock = false;
+  opened = [];
+}
+
+function onCardClick(el){
+  if(lock || el.classList.contains("matched")) return;
+
+  // если уже открыта — игнор
+  if(el.classList.contains("flipped")) return;
+
+  flipUp(el);
+
+  opened.push(el);
+  if(opened.length === 2){
+    lock = true;
+    const [a,b] = opened;
+    const match = a.dataset.src === b.dataset.src;
+
+    if(match){
+      a.classList.add("matched");
+      b.classList.add("matched");
+      opened = [];
+      lock = false;
+    }else{
+      setTimeout(()=>{
+        flipDown(a);
+        flipDown(b);
+        opened = [];
+        lock = false;
+      }, 650);
+    }
   }
 }
 
-function flipCard(card, image) {
-  if (lockBoard) return;
-  if (card === firstCard) return;
-
-  card.classList.add("flipped");
-
-  if (!firstCard) {
-    firstCard = card;
-    return;
-  }
-
-  secondCard = card;
-  checkMatch();
+function flipUp(el){
+  el.classList.add("flipped");
+  el.style.backgroundImage = `url('${el.dataset.src}')`;
+}
+function flipDown(el){
+  el.classList.remove("flipped");
+  el.style.backgroundImage = `url('${BACK}')`;
 }
 
-function checkMatch() {
-  let firstImage = firstCard.querySelector(".card-back img").src;
-  let secondImage = secondCard.querySelector(".card-back img").src;
-
-  if (firstImage === secondImage) {
-    score++;
-    document.getElementById("score").innerText = "Очки: " + score;
-
-    firstCard = null;
-    secondCard = null;
-  } else {
-    lockBoard = true;
-    setTimeout(() => {
-      firstCard.classList.remove("flipped");
-      secondCard.classList.remove("flipped");
-      firstCard = null;
-      secondCard = null;
-      lockBoard = false;
-    }, 1000);
-  }
+function exitGame(){
+  currentRoom = null;
+  showPage("lobby-page");
+  renderLobby();
 }
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+// ---------- Утилиты ----------
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
   }
-  return array;
+  return arr;
 }
+function cryptoRandom(){
+  // короткий id
+  return (Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).slice(0,12);
+}
+
+// стартовая страница
+showLogin();
