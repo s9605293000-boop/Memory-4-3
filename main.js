@@ -15,6 +15,10 @@ const images = [
 ];
 
 let currentUser = null;
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+let score = 0;
 
 function showRegister() {
   document.getElementById("login-page").style.display = "none";
@@ -60,6 +64,9 @@ function startGame(totalCards) {
   document.getElementById("lobby-page").style.display = "none";
   document.getElementById("game-page").style.display = "block";
 
+  score = 0;
+  document.getElementById("score").innerText = "Очки: 0";
+
   let gameBoard = document.getElementById("game-board");
   gameBoard.innerHTML = "";
 
@@ -78,16 +85,54 @@ function startGame(totalCards) {
         <div class="card-back"><img src="${image}" alt="pirate"></div>
       </div>
     `;
+
+    card.addEventListener("click", () => flipCard(card, image));
     gameBoard.appendChild(card);
   });
 
-  // Сетка в зависимости от уровня
   if (totalCards === 12) {
     gameBoard.style.gridTemplateColumns = "repeat(4, 1fr)";
   } else if (totalCards === 16) {
     gameBoard.style.gridTemplateColumns = "repeat(4, 1fr)";
   } else if (totalCards === 24) {
     gameBoard.style.gridTemplateColumns = "repeat(6, 1fr)";
+  }
+}
+
+function flipCard(card, image) {
+  if (lockBoard) return;
+  if (card === firstCard) return;
+
+  card.classList.add("flipped");
+
+  if (!firstCard) {
+    firstCard = card;
+    return;
+  }
+
+  secondCard = card;
+  checkMatch();
+}
+
+function checkMatch() {
+  let firstImage = firstCard.querySelector(".card-back img").src;
+  let secondImage = secondCard.querySelector(".card-back img").src;
+
+  if (firstImage === secondImage) {
+    score++;
+    document.getElementById("score").innerText = "Очки: " + score;
+
+    firstCard = null;
+    secondCard = null;
+  } else {
+    lockBoard = true;
+    setTimeout(() => {
+      firstCard.classList.remove("flipped");
+      secondCard.classList.remove("flipped");
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    }, 1000);
   }
 }
 
