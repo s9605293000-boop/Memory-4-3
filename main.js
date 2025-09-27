@@ -1,129 +1,104 @@
-/* ===== Навигация по страницам (упрощённо, без сервера) ===== */
-function showRegister(){ 
-  document.getElementById('login-page').style.display='none';
-  document.getElementById('register-page').style.display='block';
-}
-function showLogin(){ 
-  document.getElementById('login-page').style.display='block';
-  document.getElementById('register-page').style.display='none';
-}
-function login(){
-  document.getElementById('login-page').style.display='none';
-  document.getElementById('lobby-page').style.display='block';
-}
-function register(){ alert('Регистрация прошла успешно!'); showLogin(); }
-function createRoom(){
-  document.getElementById('lobby-page').style.display='none';
-  document.getElementById('game-page').style.display='block';
-}
-function exitGame(){
-  document.getElementById('game-page').style.display='none';
-  document.getElementById('lobby-page').style.display='block';
+let users = [];
+let currentUser = null;
+let records = [];
+
+function showRegister() {
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("register-page").style.display = "block";
 }
 
-/* ===== ИГРА: пиратские картинки вместо цифр ===== */
+function showLogin() {
+  document.getElementById("register-page").style.display = "none";
+  document.getElementById("login-page").style.display = "block";
+}
 
-/* имена файлов в КОРНЕ репозитория */
-const ICONS = [
-  'anchor','barrel','bomb','coin','compass','map',
-  'parrot','ship','skull','spyglass','sword','wheel'
-];
-const BACK_IMAGE = 'back.svg';
+function login() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+  const user = users.find(u => u.email === email && u.password === password);
 
-let first = null;
-let lock = false;
-let leftToMatch = 0;
+  if (user) {
+    currentUser = user;
+    document.getElementById("login-page").style.display = "none";
+    document.getElementById("lobby-page").style.display = "block";
+  } else {
+    alert("Неверные данные или пользователь не зарегистрирован.");
+  }
+}
 
-function startGame(cardCount){
-  const board = document.getElementById('game-board');
-  board.innerHTML = '';
-  board.className = '';               // сбрасываем сетку
-  if (cardCount === 12) board.classList.add('grid-12');
-  if (cardCount === 16) board.classList.add('grid-16');
-  if (cardCount === 24) board.classList.add('grid-24');
+function register() {
+  const email = document.getElementById("register-email").value;
+  const password = document.getElementById("register-password").value;
 
-  // выбираем нужное количество пар и перемешиваем
-  const pairsNeeded = cardCount / 2;
-  const chosen = ICONS.slice(0, pairsNeeded);
-  const deck = shuffle([...chosen, ...chosen]);
+  if (!users.find(u => u.email === email)) {
+    users.push({ email, password });
+    alert("Регистрация успешна! Теперь войдите.");
+    showLogin();
+  } else {
+    alert("Пользователь с таким email уже существует.");
+  }
+}
 
-  leftToMatch = pairsNeeded;
-  first = null; lock = false;
+function createRoom() {
+  const level = document.getElementById("level-select").value;
+  startGame(level);
+}
 
-  // строим карточки с фронтом (SVG) и рубашкой
-  deck.forEach(name => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.dataset.name = name;
+function startGame(level) {
+  document.getElementById("lobby-page").style.display = "none";
+  document.getElementById("game-page").style.display = "block";
 
-    const inner = document.createElement('div');
-    inner.className = 'inner';
+  const gameBoard = document.getElementById("game-board");
+  gameBoard.innerHTML = "";
 
-    const front = document.createElement('div');
-    front.className = 'card-face card-front';
-    const imgFront = document.createElement('img');
-    imgFront.src = `${name}.svg`;
-    imgFront.alt = name;
-    front.appendChild(imgFront);
+  let rows, cols;
+  if (level == 12) { rows = 3; cols = 4; }
+  if (level == 16) { rows = 4; cols = 4; }
+  if (level == 24) { rows = 4; cols = 6; }
 
-    const back = document.createElement('div');
-    back.className = 'card-face card-back';
-    const imgBack = document.createElement('img');
-    imgBack.src = BACK_IMAGE;
-    imgBack.alt = '?';
-    back.appendChild(imgBack);
+  const totalCards = rows * cols;
+  const images = [];
+  for (let i = 1; i <= totalCards / 2; i++) {
+    images.push(`https://placekitten.com/200/200?image=${i}`);
+    images.push(`https://placekitten.com/200/200?image=${i}`);
+  }
+  images.sort(() => Math.random() - 0.5);
 
-    inner.appendChild(back);
-    inner.appendChild(front);
-    card.appendChild(inner);
+  gameBoard.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-    card.addEventListener('click', onCardClick);
-    board.appendChild(card);
+  images.forEach(img => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">?</div>
+        <div class="card-back"><img src="${img}" alt="card"></div>
+      </div>
+    `;
+    gameBoard.appendChild(card);
   });
 }
 
-function onCardClick(e){
-  if (lock) return;
-  const card = e.currentTarget;
-  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
-
-  card.classList.add('flipped');
-
-  if (!first){
-    first = card;
-    return;
-  }
-
-  // сравниваем
-  lock = true;
-  const second = card;
-  const match = first.dataset.name === second.dataset.name;
-
-  if (match){
-    first.classList.add('matched');
-    second.classList.add('matched');
-    resetTurn();
-    leftToMatch--;
-    // здесь можно обновлять счёт, отправлять события в Firebase и т.д.
-  }else{
-    setTimeout(() => {
-      first.classList.remove('flipped');
-      second.classList.remove('flipped');
-      resetTurn();
-    }, 700);
-  }
+function exitGame() {
+  document.getElementById("game-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
 }
 
-function resetTurn(){
-  first = null;
-  lock = false;
+function showRecords() {
+  document.getElementById("game-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "none";
+  document.getElementById("records-page").style.display = "block";
+
+  const list = document.getElementById("records-list");
+  list.innerHTML = "";
+  records.forEach(r => {
+    let li = document.createElement("li");
+    li.textContent = `${r.user} — Очки: ${r.score}, Время: ${r.time} сек (${r.date})`;
+    list.appendChild(li);
+  });
 }
 
-/* утилита */
-function shuffle(arr){
-  for (let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+function backToLobby() {
+  document.getElementById("records-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
 }
