@@ -1,87 +1,129 @@
-// ===== helper: показ страниц =====
-function showSection(idToShow) {
-  ["login-page","register-page","lobby-page","game-page"].forEach(id=>{
-    document.getElementById(id).style.display = (id===idToShow ? "block" : "none");
-  });
+/* ===== Навигация по страницам (упрощённо, без сервера) ===== */
+function showRegister(){ 
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('register-page').style.display='block';
 }
-
-function showRegister(){ showSection("register-page"); }
-function showLogin(){ showSection("login-page"); }
-
-function register(){
-  alert("Регистрация выполнена. Войдите под своими данными.");
-  showLogin();
+function showLogin(){ 
+  document.getElementById('login-page').style.display='block';
+  document.getElementById('register-page').style.display='none';
 }
 function login(){
-  // демо-версия: просто пускаем в лобби
-  showSection("lobby-page");
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('lobby-page').style.display='block';
 }
-
-// ===== создание стола и запуск =====
+function register(){ alert('Регистрация прошла успешно!'); showLogin(); }
 function createRoom(){
-  const level = parseInt(document.getElementById("level-select").value,10);
-  startGame(level);
+  document.getElementById('lobby-page').style.display='none';
+  document.getElementById('game-page').style.display='block';
 }
-
 function exitGame(){
-  showSection("lobby-page");
-  // очистка поля
-  document.getElementById("game-board").innerHTML = "";
+  document.getElementById('game-page').style.display='none';
+  document.getElementById('lobby-page').style.display='block';
 }
 
-// ===== логика игры =====
-let firstCard = null;
+/* ===== ИГРА: пиратские картинки вместо цифр ===== */
+
+/* имена файлов в КОРНЕ репозитория */
+const ICONS = [
+  'anchor','barrel','bomb','coin','compass','map',
+  'parrot','ship','skull','spyglass','sword','wheel'
+];
+const BACK_IMAGE = 'back.svg';
+
+let first = null;
 let lock = false;
+let leftToMatch = 0;
 
-function startGame(cardsCount){
-  showSection("game-page");
+function startGame(cardCount){
+  const board = document.getElementById('game-board');
+  board.innerHTML = '';
+  board.className = '';               // сбрасываем сетку
+  if (cardCount === 12) board.classList.add('grid-12');
+  if (cardCount === 16) board.classList.add('grid-16');
+  if (cardCount === 24) board.classList.add('grid-24');
 
-  const board = document.getElementById("game-board");
-  board.classList.add("grid-4cols"); // всегда 4 колонки
-  board.innerHTML = "";
+  // выбираем нужное количество пар и перемешиваем
+  const pairsNeeded = cardCount / 2;
+  const chosen = ICONS.slice(0, pairsNeeded);
+  const deck = shuffle([...chosen, ...chosen]);
 
-  // набор пар
-  const deck = [];
-  for(let i=1;i<=cardsCount/2;i++){ deck.push(i,i); }
-  // перемешиваем
-  deck.sort(()=>Math.random() - 0.5);
+  leftToMatch = pairsNeeded;
+  first = null; lock = false;
 
-  // создаём карточки
-  deck.forEach(value=>{
-    const el = document.createElement("div");
-    el.className = "card";
-    el.dataset.value = value;
-    el.textContent = "?" ;             // рубашка
-    el.addEventListener("click", ()=> flipCard(el));
-    board.appendChild(el);
+  // строим карточки с фронтом (SVG) и рубашкой
+  deck.forEach(name => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.name = name;
+
+    const inner = document.createElement('div');
+    inner.className = 'inner';
+
+    const front = document.createElement('div');
+    front.className = 'card-face card-front';
+    const imgFront = document.createElement('img');
+    imgFront.src = `${name}.svg`;
+    imgFront.alt = name;
+    front.appendChild(imgFront);
+
+    const back = document.createElement('div');
+    back.className = 'card-face card-back';
+    const imgBack = document.createElement('img');
+    imgBack.src = BACK_IMAGE;
+    imgBack.alt = '?';
+    back.appendChild(imgBack);
+
+    inner.appendChild(back);
+    inner.appendChild(front);
+    card.appendChild(inner);
+
+    card.addEventListener('click', onCardClick);
+    board.appendChild(card);
   });
 }
 
-function flipCard(card){
-  if(lock || card.classList.contains("flipped") || card.classList.contains("matched")) return;
+function onCardClick(e){
+  if (lock) return;
+  const card = e.currentTarget;
+  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
 
-  card.classList.add("flipped");
-  card.textContent = card.dataset.value;
+  card.classList.add('flipped');
 
-  if(!firstCard){
-    firstCard = card;
+  if (!first){
+    first = card;
     return;
   }
 
-  // вторая карта
-  if(firstCard.dataset.value === card.dataset.value){
-    firstCard.classList.add("matched");
-    card.classList.add("matched");
-    firstCard = null;
+  // сравниваем
+  lock = true;
+  const second = card;
+  const match = first.dataset.name === second.dataset.name;
+
+  if (match){
+    first.classList.add('matched');
+    second.classList.add('matched');
+    resetTurn();
+    leftToMatch--;
+    // здесь можно обновлять счёт, отправлять события в Firebase и т.д.
   }else{
-    lock = true;
-    setTimeout(()=>{
-      firstCard.classList.remove("flipped");
-      card.classList.remove("flipped");
-      firstCard.textContent = "?";
-      card.textContent = "?";
-      firstCard = null;
-      lock = false;
+    setTimeout(() => {
+      first.classList.remove('flipped');
+      second.classList.remove('flipped');
+      resetTurn();
     }, 700);
   }
+}
+
+function resetTurn(){
+  first = null;
+  lock = false;
+}
+
+/* утилита */
+function shuffle(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
