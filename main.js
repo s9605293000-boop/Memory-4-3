@@ -1,137 +1,100 @@
-// ======= Регистрация и вход =======
+// Показ страниц
+function showRegister() {
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("register-page").style.display = "block";
+}
+
+function showLogin() {
+  document.getElementById("register-page").style.display = "none";
+  document.getElementById("login-page").style.display = "block";
+}
+
+// Фейковая регистрация/логин
 function register() {
-  const email = document.getElementById("register-email").value;
-  const password = document.getElementById("register-password").value;
-
-  if (!email || !password) {
-    alert("Введите email и пароль!");
-    return;
-  }
-
-  localStorage.setItem(email, password);
-  alert("Регистрация успешна!");
+  alert("Регистрация прошла успешно! Теперь войдите.");
   showLogin();
 }
 
 function login() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
-
-  if (!email || !password) {
-    alert("Введите email и пароль!");
-    return;
-  }
-
-  const storedPassword = localStorage.getItem(email);
-
-  if (storedPassword === password) {
-    alert("Добро пожаловать, " + email + "!");
-    showPage("lobby-page");
-  } else {
-    alert("Неверный email или пароль!");
-  }
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
 }
 
-function showLogin() {
-  showPage("login-page");
-}
-
-function showRegister() {
-  showPage("register-page");
-}
-
-// ======= Управление страницами =======
-function showPage(pageId) {
-  const pages = ["login-page", "register-page", "lobby-page", "game-page"];
-  pages.forEach(id => {
-    document.getElementById(id).style.display = "none";
-  });
-  document.getElementById(pageId).style.display = "block";
-}
-
-// ======= Лобби =======
+// Создание стола
 function createRoom() {
-  alert("Стол создан!");
-  showPage("game-page");
-  startGame();
+  const level = document.getElementById("level-select").value;
+  startGame(level);
 }
 
-function exitGame() {
-  showPage("lobby-page");
-}
+// Запуск игры
+function startGame(level) {
+  document.getElementById("lobby-page").style.display = "none";
+  document.getElementById("game-page").style.display = "block";
 
-// ======= Игра =======
-let firstCard = null;
-let secondCard = null;
-let lockBoard = false;
-let score1 = 0;
-let score2 = 0;
-let currentPlayer = 1;
+  const gameBoard = document.getElementById("game-board");
+  gameBoard.innerHTML = "";
 
-function startGame() {
-  const board = document.getElementById("game-board");
-  board.innerHTML = "";
+  const cardsCount = parseInt(level, 10);
 
-  const icons = ["⚓", "🚢", "🦜", "💣", "🗺️", "🏴‍☠️"];
-  let cards = [...icons, ...icons]; // 12 карт
+  // Определение сетки
+  if (cardsCount === 12) {
+    gameBoard.style.gridTemplateColumns = "repeat(4, 1fr)";
+    gameBoard.style.gridTemplateRows = "repeat(3, 1fr)";
+  } else if (cardsCount === 16) {
+    gameBoard.style.gridTemplateColumns = "repeat(4, 1fr)";
+    gameBoard.style.gridTemplateRows = "repeat(4, 1fr)";
+  } else if (cardsCount === 24) {
+    gameBoard.style.gridTemplateColumns = "repeat(6, 1fr)";
+    gameBoard.style.gridTemplateRows = "repeat(4, 1fr)";
+  }
 
-  // перемешивание
-  cards = cards.sort(() => Math.random() - 0.5);
+  // Создание массива карточек
+  const cards = [];
+  for (let i = 1; i <= cardsCount / 2; i++) {
+    cards.push(i, i);
+  }
 
-  cards.forEach(icon => {
+  // Перемешивание
+  cards.sort(() => Math.random() - 0.5);
+
+  // Отрисовка карточек
+  cards.forEach(num => {
     const card = document.createElement("div");
-    card.classList.add("card");
+    card.className = "card";
+    card.dataset.value = num;
     card.textContent = "?";
-    card.dataset.icon = icon;
-    card.addEventListener("click", flipCard);
-    board.appendChild(card);
+    card.onclick = () => flipCard(card);
+    gameBoard.appendChild(card);
   });
 }
 
-function flipCard() {
-  if (lockBoard) return;
-  if (this === firstCard) return;
+// Переворот карт
+let firstCard = null;
+function flipCard(card) {
+  if (card.classList.contains("flipped")) return;
 
-  this.textContent = this.dataset.icon;
+  card.textContent = card.dataset.value;
+  card.classList.add("flipped");
 
   if (!firstCard) {
-    firstCard = this;
-    return;
-  }
-
-  secondCard = this;
-  checkMatch();
-}
-
-function checkMatch() {
-  if (firstCard.dataset.icon === secondCard.dataset.icon) {
-    updateScore();
-    resetBoard();
+    firstCard = card;
   } else {
-    lockBoard = true;
-    setTimeout(() => {
-      firstCard.textContent = "?";
-      secondCard.textContent = "?";
-      resetBoard();
-      switchPlayer();
-    }, 1000);
+    if (firstCard.dataset.value === card.dataset.value) {
+      firstCard = null;
+    } else {
+      setTimeout(() => {
+        card.textContent = "?";
+        card.classList.remove("flipped");
+        firstCard.textContent = "?";
+        firstCard.classList.remove("flipped");
+        firstCard = null;
+      }, 800);
+    }
   }
 }
 
-function updateScore() {
-  if (currentPlayer === 1) {
-    score1++;
-  } else {
-    score2++;
-  }
-  alert("Игрок 1: " + score1 + " | Игрок 2: " + score2);
-}
-
-function switchPlayer() {
-  currentPlayer = currentPlayer === 1 ? 2 : 1;
-  alert("Ход игрока " + currentPlayer);
-}
-
-function resetBoard() {
-  [firstCard, secondCard, lockBoard] = [null, null, false];
+// Выход в лобби
+function exitGame() {
+  document.getElementById("game-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
 }
