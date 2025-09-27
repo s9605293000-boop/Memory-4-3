@@ -30,7 +30,14 @@
   <!-- Лобби -->
   <div id="lobby-page" style="display:none;">
     <h2>Лобби</h2>
+    <label>Выбери уровень:</label>
+    <select id="level-select">
+      <option value="12">Лёгкий (4x3)</option>
+      <option value="16">Средний (4x4)</option>
+      <option value="24">Сложный (6x4)</option>
+    </select>
     <button onclick="createRoom()">Создать стол</button>
+    <div id="rooms-list"></div>
   </div>
 
   <!-- Игровая страница -->
