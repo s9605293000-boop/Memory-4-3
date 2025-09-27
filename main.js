@@ -4,8 +4,15 @@ const registerPage = document.getElementById("register-page");
 const lobbyPage = document.getElementById("lobby-page");
 const gamePage = document.getElementById("game-page");
 const gameBoard = document.getElementById("game-board");
+const roomsList = document.createElement("div");
+lobbyPage.appendChild(roomsList);
 
-// ===== ФУНКЦИИ ПОКАЗА / СКРЫТИЯ =====
+// ===== ХРАНИЛИЩЕ =====
+let users = JSON.parse(localStorage.getItem("users")) || {};
+let currentUser = null;
+let rooms = [];
+
+// ===== ПОКАЗ/СКРЫТИЕ СТРАНИЦ =====
 function showLogin() {
   loginPage.style.display = "block";
   registerPage.style.display = "none";
@@ -25,6 +32,7 @@ function showLobby() {
   registerPage.style.display = "none";
   lobbyPage.style.display = "block";
   gamePage.style.display = "none";
+  renderRooms();
 }
 
 function showGame() {
@@ -34,48 +42,78 @@ function showGame() {
   gamePage.style.display = "block";
 }
 
-// ===== ЛОГИН / РЕГИСТРАЦИЯ =====
+// ===== ЛОГИН/РЕГИСТРАЦИЯ =====
 function login() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
-  if (email && password) {
-    console.log("Вход выполнен:", email);
+  if (users[email] && users[email] === password) {
+    currentUser = email;
+    console.log("Вход успешный:", email);
     showLobby();
   } else {
-    alert("Введите email и пароль!");
+    alert("Неверный email или пароль!");
   }
 }
 
 function register() {
-  const email = document.getElementById("register-email").value;
-  const password = document.getElementById("register-password").value;
+  const email = document.getElementById("register-email").value.trim();
+  const password = document.getElementById("register-password").value.trim();
 
-  if (email && password) {
-    console.log("Регистрация выполнена:", email);
-    showLobby();
-  } else {
+  if (!email || !password) {
     alert("Введите email и пароль!");
+    return;
+  }
+
+  if (users[email]) {
+    alert("Такой пользователь уже существует!");
+  } else {
+    users[email] = password;
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Регистрация успешна! Теперь войдите.");
+    showLogin();
   }
 }
 
-// ===== СОЗДАНИЕ / ВХОД В СТОЛ =====
+// ===== ЛОББИ / СТОЛЫ =====
 function createRoom() {
-  console.log("Стол создан!");
+  const roomId = "Стол #" + (rooms.length + 1);
+  rooms.push(roomId);
+  renderRooms();
+}
+
+function renderRooms() {
+  roomsList.innerHTML = "";
+  if (rooms.length === 0) {
+    roomsList.innerHTML = "<p>Столов пока нет</p>";
+  } else {
+    rooms.forEach((room, index) => {
+      const div = document.createElement("div");
+      div.textContent = room;
+      const btn = document.createElement("button");
+      btn.textContent = "Присоединиться";
+      btn.onclick = () => joinRoom(index);
+      div.appendChild(btn);
+      roomsList.appendChild(div);
+    });
+  }
+}
+
+function joinRoom(index) {
+  console.log("Присоединение к", rooms[index]);
   showGame();
   startGame();
 }
 
 function exitGame() {
-  console.log("Выход в лобби");
   showLobby();
 }
 
-// ===== ЛОГИКА ИГРЫ =====
+// ===== ИГРА =====
 function startGame() {
   gameBoard.innerHTML = "";
   const values = ["🐱", "🐶", "🦜", "⚓", "💎", "🏴‍☠️"];
-  const cards = [...values, ...values]; // пары
+  const cards = [...values, ...values];
   shuffle(cards);
 
   cards.forEach(val => {
@@ -83,7 +121,6 @@ function startGame() {
     card.classList.add("card");
     card.textContent = "?";
     card.dataset.value = val;
-
     card.addEventListener("click", () => flipCard(card));
     gameBoard.appendChild(card);
   });
@@ -117,7 +154,6 @@ function flipCard(card) {
   }
 }
 
-// Перемешивание массива
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -125,7 +161,6 @@ function shuffle(array) {
   }
 }
 
-// ===== СТАРТ ПРИ ЗАГРУЗКЕ =====
 window.onload = () => {
   showLogin();
 };
