@@ -1,49 +1,54 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Memory Duel</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <h1>Memory Duel</h1>
 
-  <!-- Страница входа -->
+  <!-- Вход -->
   <div id="login-page">
     <h2>Вход</h2>
-    <input type="text" id="login-email" placeholder="Email">
-    <input type="password" id="login-password" placeholder="Пароль">
+    <input id="login-email" type="text" placeholder="Email" />
+    <input id="login-password" type="password" placeholder="Пароль" />
     <button onclick="login()">Войти</button>
     <p>Нет аккаунта? <a href="#" onclick="showRegister()">Регистрация</a></p>
   </div>
 
-  <!-- Страница регистрации -->
-  <div id="register-page" style="display:none;">
+  <!-- Регистрация -->
+  <div id="register-page" style="display:none">
     <h2>Регистрация</h2>
-    <input type="text" id="register-email" placeholder="Email">
-    <input type="password" id="register-password" placeholder="Пароль">
+    <input id="register-email" type="text" placeholder="Email" />
+    <input id="register-password" type="password" placeholder="Пароль" />
     <button onclick="register()">Зарегистрироваться</button>
     <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
   </div>
 
   <!-- Лобби -->
-  <div id="lobby-page" style="display:none;">
+  <div id="lobby-page" style="display:none">
     <h2>Лобби</h2>
+
     <label for="level-select">Выбери уровень:</label>
     <select id="level-select">
-      <option value="12">4 x 3 (12 карт)</option>
-      <option value="16">4 x 4 (16 карт)</option>
-      <option value="24">6 x 4 (24 карты)</option>
+      <option value="12">4 × 3 (12 карт)</option>
+      <option value="16">4 × 4 (16 карт)</option>
+      <option value="24">4 × 6 (24 карты)</option>
     </select>
-    <button onclick="createRoom()">Создать стол</button>
+
+    <div class="actions">
+      <button onclick="createRoom()">Создать стол</button>
+    </div>
+
     <div id="rooms-list"></div>
   </div>
 
-  <!-- Игровая страница -->
-  <div id="game-page" style="display:none;">
+  <!-- Игра -->
+  <div id="game-page" style="display:none">
     <h2>Игра Memory Duel</h2>
-    <div id="game-board"></div>
+    <div id="game-board" class="grid-4cols"></div>
     <button onclick="exitGame()">Выйти в лобби</button>
   </div>
 
