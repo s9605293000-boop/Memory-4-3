@@ -1,62 +1,56 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #f0f2f5;
-  margin: 0;
-  padding: 0;
+:root{
+  --bg:#0f2230;
+  --panel:#e9f1f6;
+  --ink:#12202a;
+  --muted:#6b7c8a;
+  --brand:#2f6df6;
+  --chip:#e6eefc;
 }
 
-h1 {
-  margin: 20px 0;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#eaf1f6;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.app-title{margin:24px 16px 0;text-align:center}
+
+.page{max-width:980px;margin:0 auto;padding:16px}
+h2{margin:8px 0 16px}
+
+input{width:100%;padding:12px 14px;margin:6px 0;border:1px solid #cbd5df;border-radius:10px;background:#fff;font-size:16px}
+.btn{padding:12px 16px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:600}
+.btn.secondary{background:#cbd5df;color:#0d1720}
+.row{margin:12px 0}
+.muted{color:var(--muted)}
+a{color:var(--brand);text-decoration:none}
+
+.levels{display:flex;gap:8px;align-items:center;margin:8px 0 16px}
+.levels.small{justify-content:center}
+.chip{border:0;background:var(--chip);color:#1d2a38;padding:8px 12px;border-radius:999px;font-weight:600}
+.chip.active{outline:2px solid var(--brand)}
+
+.list button{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border-radius:10px;border:1px solid #d6e0ea;background:#fff}
+
+/* Доска */
+.board{
+  --cols:4;
+  display:grid;
+  grid-template-columns:repeat(var(--cols),1fr);
+  gap:12px;
+  max-width:980px;
+  margin:12px auto 32px;
+  padding:0 8px;
 }
 
-#game-board {
-  display: grid;
-  gap: 10px;
-  justify-content: center;
-  margin: 20px auto;
-  max-width: 600px;
+/* Карта = один элемент (без <img>), фон меняем JS-ом */
+.card{
+  position:relative;
+  width:100%;
+  aspect-ratio:3/4;              /* стабильная высота */
+  border-radius:14px;
+  background:#0b1c29 url('back.svg') center/cover no-repeat; /* рубашка */
+  border:2px solid #24364a;
+  box-shadow:0 1px 0 rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08);
+  transition:transform .08s ease, box-shadow .2s ease, opacity .2s ease, background-image .2s ease;
+  cursor:pointer;
 }
-
-.card {
-  width: 80px;
-  height: 100px;
-  perspective: 1000px;
-  cursor: pointer;
-}
-
-.card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.6s;
-}
-
-.card.flipped .card-inner {
-  transform: rotateY(180deg);
-}
-
-.card-front, .card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  border-radius: 6px;
-  border: 1px solid #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  background: white;
-}
-
-.card-back {
-  transform: rotateY(180deg);
-}
-
-.card-back img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.card:active{transform:scale(.98)}
+.card.flipped{ /* когда открыта — фон уже подставлен из JS */ }
+.card.matched{opacity:.35;pointer-events:none}
