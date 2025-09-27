@@ -1,192 +1,76 @@
-// --- Простая «сессия» ---
-let currentUser = null;
-let rooms = [];
-let currentRoom = null;
+let currentBackClass = "back-blue"; // по умолчанию
 
-// выбранная сетка (по умолчанию 4×3)
-let grid = { rows: 3, cols: 4 };
-
-// набор картинок (лежат у тебя в репозитории)
-const SPRITES = [
-  "anchor.svg","barrel.svg","bomb.svg","coin.svg",
-  "compass.svg","map.svg","parrot.svg","ship.svg",
-  "skull.svg","spyglass.svg","sword.svg","wheel.svg"
-];
-const BACK = "back.svg";
-
-// ---------- Навигация страниц ----------
-function showPage(id){
-  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-  document.getElementById(id).style.display = "block";
-}
-
-// ---------- Аутентификация (демо) ----------
-function login(){
-  const email = document.getElementById("login-email").value.trim();
-  const pwd   = document.getElementById("login-password").value.trim();
-  if(!email || !pwd){ alert("Введите email и пароль"); return; }
-  currentUser = { email, rating: 0 };
-  showPage("lobby-page");
-  renderLobby();
-}
-function register(){
-  const email = document.getElementById("register-email").value.trim();
-  const pwd   = document.getElementById("register-password").value.trim();
-  if(!email || !pwd){ alert("Введите email и пароль"); return; }
-  alert("Регистрация успешна!");
-  showLogin();
-}
-function showRegister(){ showPage("register-page"); }
-function showLogin(){ showPage("login-page"); }
-
-// ---------- Выбор уровня ----------
-function setActiveChip(container, rows, cols){
-  container.querySelectorAll(".chip").forEach(c=>{
-    const r = +c.dataset.rows, cl = +c.dataset.cols;
-    c.classList.toggle("active", r===rows && cl===cols);
-  });
-}
-function selectLevel(btn){
-  grid = { rows:+btn.dataset.rows, cols:+btn.dataset.cols };
-  setActiveChip(btn.parentElement, grid.rows, grid.cols);
-}
-function rebuildFromChip(btn){
-  selectLevel(btn);
-  startGame(); // перестроить поле в игре
-}
-
-// ---------- Лобби ----------
-function renderLobby(){
-  // выставим активный чип (визуально)
-  const lobbyLevels = document.querySelector("#lobby-page .levels");
-  setActiveChip(lobbyLevels, grid.rows, grid.cols);
-
-  const list = document.getElementById("rooms-list");
-  list.innerHTML = "";
-  rooms.forEach((room, i)=>{
-    const b = document.createElement("button");
-    b.textContent = `Стол #${i+1} (${room.rows}×${room.cols}) — игроков: ${room.players.length}/2`;
-    b.onclick = ()=>joinRoom(i);
-    list.appendChild(b);
-  });
-}
-function createRoom(){
-  const room = {
-    rows: grid.rows,
-    cols: grid.cols,
-    players: [currentUser],
-    deck: []
-  };
-  rooms.push(room);
-  renderLobby();
-}
-function joinRoom(i){
-  const room = rooms[i];
-  if(!room) return;
-  if(room.players.length >= 2){ alert("Стол уже полон"); return; }
-  room.players.push(currentUser);
-  currentRoom = room;
-  // сетку берём из стола
-  grid = { rows: room.rows, cols: room.cols };
-  startGame();
-}
-
-// ---------- Игра ----------
-let lock = false;
-let opened = []; // открытые (2 макс)
-
-function startGame(){
-  showPage("game-page");
-
-  // активный чип в шапке игры
-  const gameLevels = document.querySelector("#game-page .levels");
-  setActiveChip(gameLevels, grid.rows, grid.cols);
-
+function startGame(level) {
   const board = document.getElementById("game-board");
-  board.style.setProperty("--cols", grid.cols);
   board.innerHTML = "";
 
-  const pairCount = (grid.rows * grid.cols) / 2;
-  const sprites = SPRITES.slice(0, pairCount);
-  const deck = shuffle([...sprites, ...sprites]).map(src => ({
-    id: cryptoRandom(),
-    src,
-    matched: false
-  }));
+  let rows, cols;
 
-  // сохраним в текущем столе (если есть)
-  if(currentRoom){ currentRoom.deck = deck; }
+  if (level === "4x3") {
+    rows = 3; cols = 4;
+    currentBackClass = "back-blue";
+  } else if (level === "4x4") {
+    rows = 4; cols = 4;
+    currentBackClass = "back-green";
+  } else if (level === "4x6") {
+    rows = 6; cols = 4;
+    currentBackClass = "back-red";
+  }
 
-  deck.forEach(cardData=>{
-    const el = document.createElement("div");
-    el.className = "card";
-    el.dataset.src = cardData.src;     // лицевая сторона
-    el.style.backgroundImage = `url('${BACK}')`; // рубашка
-    el.onclick = () => onCardClick(el);
-    board.appendChild(el);
+  board.style.gridTemplateColumns = `repeat(${cols}, 70px)`;
+  board.style.gridTemplateRows = `repeat(${rows}, 100px)`;
+
+  const totalCards = rows * cols;
+  const cards = generateCards(totalCards);
+
+  cards.forEach(card => {
+    const div = document.createElement("div");
+    div.classList.add("card", currentBackClass);
+    div.dataset.value = card;
+
+    div.addEventListener("click", () => flipCard(div));
+
+    board.appendChild(div);
   });
-
-  lock = false;
-  opened = [];
 }
 
-function onCardClick(el){
-  if(lock || el.classList.contains("matched")) return;
-
-  // если уже открыта — игнор
-  if(el.classList.contains("flipped")) return;
-
-  flipUp(el);
-
-  opened.push(el);
-  if(opened.length === 2){
-    lock = true;
-    const [a,b] = opened;
-    const match = a.dataset.src === b.dataset.src;
-
-    if(match){
-      a.classList.add("matched");
-      b.classList.add("matched");
-      opened = [];
-      lock = false;
-    }else{
-      setTimeout(()=>{
-        flipDown(a);
-        flipDown(b);
-        opened = [];
-        lock = false;
-      }, 650);
-    }
+function generateCards(total) {
+  let arr = [];
+  for (let i = 1; i <= total / 2; i++) {
+    arr.push(i, i);
   }
+  return arr.sort(() => Math.random() - 0.5);
 }
 
-function flipUp(el){
-  el.classList.add("flipped");
-  el.style.backgroundImage = `url('${el.dataset.src}')`;
-}
-function flipDown(el){
-  el.classList.remove("flipped");
-  el.style.backgroundImage = `url('${BACK}')`;
+function flipCard(card) {
+  if (card.classList.contains("flipped")) return;
+
+  card.classList.add("flipped");
+  card.style.backgroundImage = `url('assets/${card.dataset.value}.png')`;
 }
 
-function exitGame(){
-  currentRoom = null;
-  showPage("lobby-page");
-  renderLobby();
+/* Заглушки для кнопок */
+function login() {
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
 }
-
-// ---------- Утилиты ----------
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  return arr;
+function showRegister() {
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("register-page").style.display = "block";
 }
-function cryptoRandom(){
-  // короткий id
-  return (Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).slice(0,12);
+function showLogin() {
+  document.getElementById("register-page").style.display = "none";
+  document.getElementById("login-page").style.display = "block";
 }
-
-// стартовая страница
-showLogin();
+function register() {
+  document.getElementById("register-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
+}
+function createRoom() {
+  document.getElementById("lobby-page").style.display = "none";
+  document.getElementById("game-page").style.display = "block";
+}
+function exitGame() {
+  document.getElementById("game-page").style.display = "none";
+  document.getElementById("lobby-page").style.display = "block";
+}
