@@ -1,0 +1,36 @@
+
+* { box-sizing: border-box; }
+body { font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:#0f1824; color:#e8eef9; }
+a { color: inherit; }
+.page { max-width: 1080px; margin: 0 auto; padding: 16px; }
+.cards { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.bigBtn { display:inline-flex; align-items:center; justify-content:center; padding:14px 18px; border:1px solid #2a3650; border-radius:12px; font-weight:700; text-decoration:none; background:#142034; }
+.bigBtn.primary { background:#ffd54d; color:#132033; }
+.bigBtn.secondary { background:#203150; }
+.smallBtn { padding:8px 12px; border:1px solid #2a3650; border-radius:8px; background:#142034; color:#e8eef9;}
+.linkBack { text-decoration:none; }
+.panel { background:#142034; border:1px solid #2a3650; border-radius:12px; padding:12px; margin-bottom:12px; }
+.joinBox { display:flex; gap:8px; }
+.joinBox input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid #2a3650; background:#0c1524; color:#e8eef9; }
+
+.grid { display:grid; gap:8px; margin:16px 0; }
+.grid-12 { grid-template-columns: repeat(4, minmax(60px,1fr)); }
+.grid-16 { grid-template-columns: repeat(4, minmax(60px,1fr)); }
+.grid-24 { grid-template-columns: repeat(6, minmax(60px,1fr)); }
+
+.tile { aspect-ratio: 1/1; border:1px solid #2a3650; border-radius:12px; font-size:28px; background:#0c1524; color:#e8eef9; }
+.tile.face { background:#142034; }
+
+.topbar { display:flex; align-items:center; gap:8px; }
+.badge { background:#203150; padding:6px 10px; border-radius:12px; border:1px solid #2a3650; }
+
+.playersRow { display:flex; gap:12px; margin:12px 0; }
+.playerBox { flex:1; border:1px solid #2a3650; border-radius:12px; padding:10px; background:#142034; }
+.playerBox.active { outline:2px solid #ffd54d; }
+.turn { font-size:12px; color:#bcd1ff; }
+
+.hud { display:flex; align-items:center; gap:12px; }
+.row { display:flex; gap:8px; }
+
+.modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; }
+.modalBox { background:#142034; color:#e8eef9; border-radius:16px; padding:20px; min-width:300px; border:1px solid #2a3650; }
